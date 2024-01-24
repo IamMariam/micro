@@ -1,1 +1,1 @@
-# micro
+# 8086-microprocessor based system to transmit and receive data. The data received should be displayed on 16x2 LCD display [1]. The system includes a 4x4 keypad, through which, the user can enter numeric values to be sent serially. The memory system organized as follows; an EPROM contains the BIOS (you select the size of the EPROM) and a RAM that covers three areas

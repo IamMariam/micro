@@ -1,0 +1,56 @@
+8251 Programming (setting mode and commands):
+
+dataPort EQU 5000
+CMND EQU 5001
+
+Tranmitting:
+
+;Send dummy command
+ mov AL , 0x8FH
+ OUT CMND , AL
+
+;Send mode
+ mov AL , 0x4DH
+ OUT CMND , AL
+
+;Send command
+ mov AL , 0x13H
+ OUT CMND , AL
+
+;Read status to check if ready to Transmit & Buffer is empty
+recheck:
+ IN AL , CMND
+ TEST AL , 0X05H ; TxRdy & Buffer empty?
+ JZ recheck
+
+;Transmit data
+ mov AL , " data "
+ OUT dataPort , AL
+
+	**********************************************
+
+Receieving:
+
+;Send dummy command
+ mov AL , 0x8FH
+ OUT CMND , AL
+
+;Send mode
+ mov AL , 0x4DH
+ OUT CMND , AL
+
+;Send command
+ mov AL , 0x34H
+ OUT CMND , AL
+
+;Read status to check if Ready
+notready:
+ mov AL , CMND
+ TEST AL , 0X02H
+ JZ notready
+
+ TEST AL , 0X31H
+ JNZ HandleError
+
+;Read data 
+ mov AL , dataPort

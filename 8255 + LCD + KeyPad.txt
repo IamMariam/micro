@@ -1,0 +1,145 @@
+;8255 Programming:
+
+PA EQU 6000
+PB EQU 6001
+PC EQU 6002
+CMND EQU 6003
+
+
+	**********************************************
+
+;Set up 8255 (Send Command A)
+ mov AL , 0x90H		;AL = 1001 0000
+ OUT CMND , AL
+
+	**********************************************
+
+Wait_For_KeyStroke:
+ mov BL , 0x77H	; BL = 0111 0111
+
+inner_check:
+ RAL BL , 1
+ mov AL , BL
+ OUT PC , AL ; send walking zero
+ CALL DelayProc
+ IN AL , PA ; read port A
+ TEST AL ,0xFFH ; any key pressed?
+ JE inner_check
+
+	**********************************************
+
+; AL has the values from port A & BL has the sent values to port C
+
+ and AL , 0x0FH ; AL = 0000 xxxx
+ and BL , 0x0FH ; BL = 0000 xxxx
+
+ TEST AL , 0X07H
+ JE row0
+ TEST AL , 0X0BH
+ JE row1
+ TEST AL , 0X0DH
+ JE row2
+ TEST AL , 0X0EH
+ JE row3
+
+	**********************************************
+
+row0:
+ TEST BL , 0X07H
+ JNE skip7
+ mov AL , "7"
+ OUT PB , AL
+ JMP DONE
+
+skip7:
+ TEST BL , 0X0BH
+ JNE skip8
+ mov AL , "8"
+ OUT PB , AL
+ JMP DONE
+
+skip8:
+ TEST BL , 0X0DH
+ JNE skip9
+ mov AL , "9"
+ OUT PB , AL 
+ JMP DONE
+
+skip9:
+ TEST BL , 0X0EH
+ mov AL , "/"
+ OUT PB , AL 
+ JMP DONE
+
+	**********************************************
+
+row1:
+ TEST BL , 0X07H
+ JNE skip4
+ mov AL , "4"
+ OUT PB , AL
+ JMP DONE
+
+skip4:
+ TEST BL , 0X0BH
+ JNE skip5
+ mov AL , "5"
+ OUT PB , AL
+ JMP DONE
+
+skip05:
+ TEST BL , 0X0DH
+ JNE skip6
+ mov AL , "6"
+ OUT PB , AL 
+ JMP DONE
+
+skip6:
+ TEST BL , 0X0EH
+ mov AL , "*"
+ OUT PB , AL 
+ JMP DONE
+
+	**********************************************
+
+row3:
+ TEST BL , 0X07H
+ JNE skipClear
+ mov AL , " "
+ OUT PB , AL
+ JMP DONE
+
+skipClear:
+ TEST BL , 0X0BH
+ JNE skip0
+ mov AL , "0"
+ OUT PB , AL
+ JMP DONE
+
+skip0:
+ TEST BL , 0X0DH
+ JNE skipEq
+ mov AL , "="
+ OUT PB , AL 
+ JMP DONE
+
+skipEq:
+ TEST BL , 0X0EH
+ mov AL , "+"
+ OUT PB , AL 
+ JMP DONE
+
+	**********************************************
+
+Release_Key:
+
+DONE:
+ mov AL , BL
+ OUT PC , AL
+ CALL DelayProc
+ IN AL , PA
+ TEST AL , 0XFFH 
+;AL = 0XFFH -> released key
+;AL != 0x0FFH -> still pressed loop again
+ JNE DONE
+JMP Wait_For_KeyStroke

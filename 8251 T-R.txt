@@ -8,6 +8,8 @@ Tranmitting:
 ;Send dummy command
  mov AL , 0x8FH
  OUT CMND , AL
+ mov AL , 0x40H ; IR = 1 to rest the mode
+ OUT CMND , AL
 
 ;Send mode
  mov AL , 0x4DH
@@ -34,6 +36,8 @@ Receieving:
 ;Send dummy command
  mov AL , 0x8FH
  OUT CMND , AL
+ mov AL , 0x40H ; IR = 1 to rest the mode
+ OUT CMND , AL
 
 ;Send mode
  mov AL , 0x4DH
@@ -45,7 +49,7 @@ Receieving:
 
 ;Read status to check if Ready
 notready:
- mov AL , CMND
+ IN AL , CMND
  TEST AL , 0X02H
  JZ notready
 
@@ -53,4 +57,4 @@ notready:
  JNZ HandleError
 
 ;Read data 
- mov AL , dataPort
+ IN AL , dataPort
